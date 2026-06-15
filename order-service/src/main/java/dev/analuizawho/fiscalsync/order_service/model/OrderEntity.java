@@ -1,5 +1,6 @@
 package dev.analuizawho.fiscalsync.order_service.model;
 
+import dev.analuizawho.fiscalsync.order_service.dto.OrderRequestUpdate;
 import dev.analuizawho.fiscalsync.order_service.model.enums.PaymentMethod;
 import dev.analuizawho.fiscalsync.order_service.model.enums.Status;
 import jakarta.persistence.*;
@@ -59,4 +60,14 @@ public class OrderEntity {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Boolean active;
+
+    public void update(OrderRequestUpdate request){
+        this.totalAmount = request.totalAmount() != null ? request.totalAmount() : this.totalAmount;
+        this.paymentMethod = request.paymentMethod() != null ? request.paymentMethod() : this.paymentMethod;
+        this.shippingAddress = request.shippingAddress() != null ? request.shippingAddress() : this.shippingAddress;
+        this.items = request.items() != null ? request.items() : this.items;
+    }
 }
