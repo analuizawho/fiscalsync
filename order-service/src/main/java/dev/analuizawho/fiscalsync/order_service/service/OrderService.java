@@ -4,6 +4,7 @@ import dev.analuizawho.fiscalsync.order_service.dto.OrderRequest;
 import dev.analuizawho.fiscalsync.order_service.dto.OrderRequestUpdate;
 import dev.analuizawho.fiscalsync.order_service.dto.OrderResponse;
 import dev.analuizawho.fiscalsync.order_service.mapper.OrderMapper;
+import dev.analuizawho.fiscalsync.order_service.model.OrderEntity;
 import dev.analuizawho.fiscalsync.order_service.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,8 +34,8 @@ public class OrderService {
     // regra de negócio (um client pode ter uma ou mais orders)
     @Transactional(readOnly = true)
     public List<OrderResponse> findById(UUID id){
-        var orderEntity = repository.getReferenceById(id);
-        return mapper.toResponseList(orderEntity);
+        List<OrderEntity> orderEntities = repository.findByCustomerId(id);
+        return mapper.toResponseList(orderEntities);
     }
 
     @Transactional
