@@ -3,6 +3,8 @@ package dev.analuizawho.fiscalsync.order_service.service;
 import dev.analuizawho.fiscalsync.order_service.dto.OrderRequest;
 import dev.analuizawho.fiscalsync.order_service.dto.OrderRequestUpdate;
 import dev.analuizawho.fiscalsync.order_service.dto.OrderResponse;
+import dev.analuizawho.fiscalsync.order_service.exception.CustomerNotFoundException;
+import dev.analuizawho.fiscalsync.order_service.exception.OrderNotFoundException;
 import dev.analuizawho.fiscalsync.order_service.mapper.OrderMapper;
 import dev.analuizawho.fiscalsync.order_service.model.OrderEntity;
 import dev.analuizawho.fiscalsync.order_service.repository.OrderRepository;
@@ -34,13 +36,15 @@ public class OrderService {
     // regra de negócio (um client pode ter uma ou mais orders)
     @Transactional(readOnly = true)
     public List<OrderResponse> findById(UUID id){
-        List<OrderEntity> orderEntities = repository.findByCustomerId(id);
+        List<OrderEntity> orderEntities = repository.findByCustomerId(id).orElseThrow(()->
+                new CustomerNotFoundException("Order not found with customer id: " + id));
         return mapper.toResponseList(orderEntities);
     }
 
     @Transactional
     public OrderResponse update(UUID id, OrderRequestUpdate orderUpdate){
-        var orderEntity = repository.getReferenceById(id);
+        var orderEntity = repository.findById(id).orElseThrow(()->
+                new OrderNotFoundException("Order not found with id: " + id));
         orderEntity.update(orderUpdate);
         repository.save(orderEntity);
         return mapper.toResponse(orderEntity);
@@ -48,14 +52,16 @@ public class OrderService {
 
     @Transactional
     public void softDelete(UUID id){
-        var orderEntity = repository.getReferenceById(id);
+        var orderEntity = repository.findById(id).orElseThrow(()->
+                new OrderNotFoundException("Order not found with id: " + id));
         orderEntity.setActive(false);
         repository.save(orderEntity);
     }
 
     @Transactional
     public void activate(UUID id){
-        var orderEntity = repository.getReferenceById(id);
+        var orderEntity = repository.findById(id).orElseThrow(()->
+                new OrderNotFoundException("Order not found with id: " + id));
         orderEntity.setActive(true);
         repository.save(orderEntity);
     }
