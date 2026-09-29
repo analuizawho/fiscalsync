@@ -19,8 +19,8 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(CustomerNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCustomerNotFound(CustomerNotFoundException e){
+    @ExceptionHandler(CustomersOrdersNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCustomerNotFound(CustomersOrdersNotFoundException e){
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(
