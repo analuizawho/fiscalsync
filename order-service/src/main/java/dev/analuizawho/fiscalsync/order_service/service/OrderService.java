@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,9 +32,8 @@ public class OrderService {
     @Transactional
     public OrderResponse create(OrderRequest orderRequest) {
         var orderEntity = mapper.toEntity(orderRequest);
-        if(!PaymentMethod.ALL_PAYMENT_METHODS.contains(orderRequest.paymentMethod())){
-            throw new InvalidRequestException("Payment method must be one of the following: " + PaymentMethod.ALL_PAYMENT_METHODS);
-        }
+
+        validatePaymentMethod(orderRequest.paymentMethod());
         repository.save(orderEntity);
         return mapper.toResponse(orderEntity);
     }
@@ -50,9 +50,8 @@ public class OrderService {
     public OrderResponse update(UUID id, OrderRequestUpdate orderUpdate){
         var orderEntity = repository.findById(id).orElseThrow(()->
                 new OrderNotFoundException("Order not found with id: " + id));
-        if(!PaymentMethod.ALL_PAYMENT_METHODS.contains(orderUpdate.paymentMethod())){
-            throw new InvalidRequestException("Payment method must be one of the following: " + PaymentMethod.ALL_PAYMENT_METHODS);
-        }
+
+        validatePaymentMethod(orderUpdate.paymentMethod());
         orderEntity.update(orderUpdate);
         repository.save(orderEntity);
         return mapper.toResponse(orderEntity);
@@ -72,5 +71,14 @@ public class OrderService {
                 new OrderNotFoundException("Order not found with id: " + id));
         orderEntity.setActive(true);
         repository.save(orderEntity);
+    }
+
+    private void validatePaymentMethod(PaymentMethod paymentMethod) {
+        if (!PaymentMethod.ALL_PAYMENT_METHODS.contains(paymentMethod)) {
+            throw new InvalidRequestException(
+                    "Payment method must be one of the following: "
+                            + PaymentMethod.ALL_PAYMENT_METHODS
+            );
+        }
     }
 }
